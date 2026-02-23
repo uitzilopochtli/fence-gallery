@@ -1,0 +1,6 @@
+MASTER_PASSWORDS.md
+*-original.*
+*-OLD.*
+.env
+node_modules/
+.netlify/
