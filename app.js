@@ -40,7 +40,7 @@ async function validateAccessCode(code) {
     
     // Call the API to validate
     try {
-        const response = await fetch('https://desplainesfencegalery.netlify.app/api/validate-code', {
+        const response = await fetch('https://desplainesfenceinfo.netlify.app/api/validate-code', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
