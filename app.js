@@ -21,50 +21,27 @@ function checkAuthentication() {
     return false;
 }
 
-// Validate access code by calling the API
-async function validateAccessCode(code) {
-    // Remove spaces
-    code = code.replace(/\s/g, '');
-    
-    // MASTER OVERRIDE CODES - Always work, no time restrictions
+// Returns the current ISO week number (1–53). Resets each year, starts Monday.
+function getCurrentWeekNumber() {
+    const now = new Date();
+    const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7)); // Thursday of current week
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+}
+
+// Validate access code locally — no API calls needed.
+function validateAccessCode(code) {
+    code = code.replace(/\s/g, '').toUpperCase();
+
     const masterCodes = ['ADMIN2024', 'DESPLAINES', 'MASTER'];
-    if (masterCodes.includes(code.toUpperCase())) {
+    const weekCode = 'WEEK' + getCurrentWeekNumber();
+
+    if (masterCodes.includes(code) || code === weekCode) {
         return { valid: true, code: code };
     }
-    
-    // Check if code looks like a GHL contact ID (alphanumeric, 15+ chars)
-    const ghlContactIdPattern = /^[A-Za-z0-9]{15,}$/;
-    if (!ghlContactIdPattern.test(code)) {
-        return { valid: false, error: 'Invalid code format. Please check your text message.' };
-    }
-    
-    // Call the API to validate
-    try {
-        const response = await fetch('https://desplainesfenceinfo.netlify.app/api/validate-code', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ contactId: code })
-        });
-        
-        const data = await response.json();
-        
-        if (data.valid) {
-            return { valid: true, code: code };
-        } else {
-            return { 
-                valid: false, 
-                error: data.error || 'Access code is not valid at this time.' 
-            };
-        }
-    } catch (error) {
-        console.error('API Error:', error);
-        return { 
-            valid: false, 
-            error: 'Unable to verify code. Please try again or contact us.' 
-        };
-    }
+
+    return { valid: false, error: 'Invalid access code. Please check your text message.' };
 }
 
 // Unlock the gallery
@@ -90,15 +67,7 @@ function setupPasswordScreen() {
             return;
         }
         
-        // Show loading state
-        passwordSubmit.textContent = 'Validating...';
-        passwordSubmit.disabled = true;
-        
-        const validation = await validateAccessCode(code);
-        
-        // Reset button
-        passwordSubmit.textContent = 'Access Gallery';
-        passwordSubmit.disabled = false;
+            const validation = validateAccessCode(code);
         
         if (validation.valid) {
             // Store in session (expires when browser closes)
