@@ -157,11 +157,16 @@ function setupEventListeners() {
     container.addEventListener('touchend', handleTouchEnd);
     
     // Close modal
-    document.getElementById('closeModal').addEventListener('click', closeModal);
+    document.getElementById('modalClose').addEventListener('click', closeModal);
     document.getElementById('detailModal').addEventListener('click', (e) => {
         if (e.target.id === 'detailModal') {
             closeModal();
         }
+    });
+
+    // ESC key closes modal
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
     });
 }
 
